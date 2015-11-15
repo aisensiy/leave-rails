@@ -1,27 +1,13 @@
 Rails.application.routes.draw do
-  get 'events/index'
-
-  resources :kpis, only: [:create, :show, :index], defaults: {format: :json}
-
-  resources :blogs
   resources :members, only: [:create, :show, :index], defaults: {format: :json} do
     post :login, on: :collection
     post :logout, on: :collection
     post :assigned, on: :member
-    get :tasks, on: :member
-  end
-
-  resources :projects, only: [:create, :show, :index], defaults: {format: :json} do
-    post :assigned, on: :member
-    resources :tasks, only: [:create, :show, :index, :destroy], defaults: {format: :json} do
-      post :transferred, on: :member
-      post :finished, on: :member
-      post :assigned, on: :member
+    resources :leave_requests, only: [:create, :show, :index] do
+      post :processed, on: :member
     end
-  end
-
-  resources :teams, only: [:create, :show, :index], defaults: {format: :json} do
-    get :tasks, on: :member
+    resources :timecards, only: [:create, :show, :index]
+    resources :leave_conflicts, only: [:create, :show, :index]
   end
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

@@ -19,12 +19,12 @@ class MembersController < ApplicationController
 
   def assigned
     authorize! :assigned, Member.new
-    member = Member.find(params[:id])
-    team = Team.find(params[:team_id])
-    if team.nil? || member.nil?
+    employee = Member.find(params[:id])
+    manager = Member.where(id: params[:manager_id], role: :manager).first
+    if manager.nil? || employee.nil?
       render status: 404, nothing: true
     else
-      member.assign_to team
+      employee.assign_to manager
       render nothing: true, status: 200
     end
   end
