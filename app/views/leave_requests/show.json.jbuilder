@@ -1,1 +1,1 @@
-json.extract! @leave_request, :id, :created_at, :updated_at
+json.extract! @leave_request, :id, :title, :status, :created_at, :updated_at

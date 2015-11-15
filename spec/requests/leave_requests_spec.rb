@@ -29,38 +29,27 @@ RSpec.describe "LeaveRequests", type: :request do
     end
   end
 
-  describe "login" do
-    it "should 400 if wrong password or username" do
-      post "/leave_requests/login", {name: "asdf", password: "ddd"}
-      expect(response).to have_http_status(400)
-    end
-  end
-
-  describe "logout" do
-    it "should logout" do
-      admin = create :admin
-      post "/leave_requests/login", {password: admin.password, name: admin.name}
-      post "/leave_requests/logout"
-      expect(response).to have_http_status(200)
-      post "/leave_requests", leave_request: {name: 'bb'}
-      expect(response).to have_http_status(401)
-    end
-  end
-
   describe "get one leave_request" do
     it "should get one leave_request" do
-      leave_request = create :employee
-      login(leave_request)
-      get "/leave_requests/#{leave_request.id}"
+      employee = create :employee
+      leave_attrs = attributes_for :leave_request
+      leave_request = employee.leave_requests.create leave_attrs
+
+      login(employee)
+      get "/members/#{employee.id}/leave_requests/#{leave_request.id}"
       expect(response).to have_http_status(200)
       data = JSON.parse(response.body)
-      expect(data['name']).to eq(leave_request.name)
+      expect(data['title']).to eq(leave_request.title)
+      expect(data['status']).to eq(leave_request.status.to_s)
     end
 
     it "should 404" do
-      leave_request = create :employee
-      login(leave_request)
-      get "/leave_requests/1"
+      employee = create :employee
+      leave_attrs = attributes_for :leave_request
+      leave_request = employee.leave_requests.create leave_attrs
+
+      login(employee)
+      get "/members/#{employee.id}/leave_requests/123"
       expect(response).to have_http_status(404)
     end
   end

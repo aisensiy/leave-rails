@@ -1,5 +1,6 @@
 class LeaveRequestsController < ApplicationController
-  before_action :set_leave_request, only: [:show, :edit, :update, :destroy]
+  # before_action :set_leave_request, only: [:show, :edit, :update, :destroy]
+  before_filter :set_member
 
   # GET /leave_requests
   # GET /leave_requests.json
@@ -10,6 +11,10 @@ class LeaveRequestsController < ApplicationController
   # GET /leave_requests/1
   # GET /leave_requests/1.json
   def show
+    @leave_request = @member.leave_requests.find(params[:id])
+    if @leave_request.nil?
+      render status: 404, nothing: true and return
+    end
   end
 
   # GET /leave_requests/new
@@ -37,31 +42,15 @@ class LeaveRequestsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /leave_requests/1
-  # PATCH/PUT /leave_requests/1.json
-  def update
-    respond_to do |format|
-      if @leave_request.update(leave_request_params)
-        format.html { redirect_to @leave_request, notice: 'Leave request was successfully updated.' }
-        format.json { render :show, status: :ok, location: @leave_request }
-      else
-        format.html { render :edit }
-        format.json { render json: @leave_request.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # DELETE /leave_requests/1
-  # DELETE /leave_requests/1.json
-  def destroy
-    @leave_request.destroy
-    respond_to do |format|
-      format.html { redirect_to leave_requests_url, notice: 'Leave request was successfully destroyed.' }
-      format.json { head :no_content }
-    end
-  end
-
   private
+
+  def set_member
+    @member = Member.find(params[:member_id])
+    if @member != current_user
+      render status: 403, nothing: true and return
+    end
+  end
+
   # Use callbacks to share common setup or constraints between actions.
   def set_leave_request
     @leave_request = LeaveRequest.find(params[:id])
