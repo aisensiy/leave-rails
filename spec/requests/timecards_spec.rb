@@ -53,20 +53,18 @@ RSpec.describe "Timecards", type: :request do
 
   describe "list timecards" do
     it "should list timecards" do
-      employee = create :employee
-
       5.times do |i|
-        attrs = attributes_for :timecard, title: "title_#{i}"
-        employee.timecards.create attrs
+        attrs = attributes_for :timecard, date: "2015-11-0#{i + 1}"
+        @employee.timecards.create attrs
       end
 
-      login(employee)
-      get "/members/#{employee.id}/timecards"
+      login(@employee)
+      get "/members/#{@employee.id}/timecards"
       expect(response).to have_http_status(200)
       data = JSON.parse(response.body)
-      expect(data.size).to eq(5)
-      first = data[0]
-      expect(first["title"]).to eq("title_0")
+      expect(data.size).to eq(6)
+      first = data[-1]
+      expect(first["date"]).to eq("2015-11-05")
     end
   end
 
