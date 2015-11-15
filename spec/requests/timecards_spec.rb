@@ -1,11 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe "Timecards", type: :request do
-  describe "create new timecard" do
-    before(:each) do
-      @employee = create :employee
-    end
+  before(:each) do
+    @employee = create :employee
+    timecard_attrs = attributes_for :timecard
+    @timecard = @employee.timecards.create timecard_attrs
+  end
 
+  describe "create new timecard" do
     it "should 403 without system login" do
       employee2 = create :employee, name: 'two'
       timecard_attrs = attributes_for :timecard
@@ -34,25 +36,17 @@ RSpec.describe "Timecards", type: :request do
 
   describe "get one timecard" do
     it "should get one timecard" do
-      employee = create :employee
-      timecard_attrs = attributes_for :timecard
-      timecard = employee.timecards.create timecard_attrs
-
-      login(employee)
-      get "/members/#{employee.id}/timecards/#{timecard.id}"
+      login(@employee)
+      get "/members/#{@employee.id}/timecards/#{@timecard.id}"
       expect(response).to have_http_status(200)
       data = JSON.parse(response.body)
-      expect(data['title']).to eq(timecard.title)
-      expect(data['status']).to eq(timecard.status.to_s)
+      expect(data['hour']).to eq(@timecard.hour)
+      expect(data['date']).to eq(@timecard.date.to_s)
     end
 
     it "should 404" do
-      employee = create :employee
-      timecard_attrs = attributes_for :timecard
-      timecard = employee.timecards.create timecard_attrs
-
-      login(employee)
-      get "/members/#{employee.id}/timecards/123"
+      login(@employee)
+      get "/members/#{@employee.id}/timecards/123"
       expect(response).to have_http_status(404)
     end
   end

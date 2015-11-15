@@ -4,7 +4,7 @@ class Timecard
 
   embedded_in :member
   field :hour, type: Integer
-  field :date, type: Time
+  field :date, type: String
 
   validates_presence_of :hour, :date
 end
