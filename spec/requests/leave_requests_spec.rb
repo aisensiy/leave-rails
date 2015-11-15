@@ -56,17 +56,20 @@ RSpec.describe "LeaveRequests", type: :request do
 
   describe "list leave_requests" do
     it "should list leave_requests" do
+      employee = create :employee
+
       5.times do |i|
-        create :employee, name: "name_#{i}"
+        attrs = attributes_for :leave_request, title: "title_#{i}"
+        employee.leave_requests.create attrs
       end
-      leave_request = create :employee
-      login(leave_request)
-      get "/leave_requests"
+
+      login(employee)
+      get "/members/#{employee.id}/leave_requests"
       expect(response).to have_http_status(200)
       data = JSON.parse(response.body)
-      expect(data.size).to eq(6)
+      expect(data.size).to eq(5)
       first = data[0]
-      expect(first["name"]).to eq("name_0")
+      expect(first["title"]).to eq("title_0")
     end
   end
 end

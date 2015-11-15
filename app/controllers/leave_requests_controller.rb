@@ -5,7 +5,7 @@ class LeaveRequestsController < ApplicationController
   # GET /leave_requests
   # GET /leave_requests.json
   def index
-    @leave_requests = LeaveRequest.all
+    @leave_requests = @member.leave_requests.all
   end
 
   # GET /leave_requests/1
