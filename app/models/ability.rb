@@ -8,9 +8,6 @@ class Ability
       can :manage, :all
     else
       can :read, :all
-      cannot :assigned, Member
-      cannot :assigned, Team
-      cannot :read, Kpi
     end
     # Define abilities for the passed in user here. For example:
     #

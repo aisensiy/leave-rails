@@ -10,16 +10,16 @@ class Member
   field :password_digest
 
   validates_presence_of :name, :password, :role
-  has_many :assignments
 
   has_secure_password
 
-  def assign_to team
-    self.assignments.where(current: true).update_all(current: false)
-    Assignment.create(team: team, member: self)
+  def assign_to manager
+    Assignment.where(employee_id: self.id, current: true).update_all(current: false)
+    Assignment.create(manager_id: manager.id, employee_id: self.id)
   end
 
   def assign
-    assignments.where(current: true).first.try(:team)
+    manager_id = Assignment.where(employee_id: self.id, current: true).first.try(:manager_id)
+    Member.find(manager_id) unless manager_id.nil?
   end
 end

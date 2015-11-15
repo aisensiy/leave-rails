@@ -28,7 +28,6 @@ RSpec.describe "Members", type: :request do
 
   describe "login" do
     it "should 400 if wrong password or username" do
-      employee = create(:employee)
       post "/members/login", {name: "asdf", password: "ddd"}
       expect(response).to have_http_status(400)
     end
@@ -79,10 +78,10 @@ RSpec.describe "Members", type: :request do
     end
   end
 
-  describe "assign member to team" do
-    it "should assign member to team by admin" do
-      team = create :teamOne
-      member = create :employee
+  describe "assign employee to manager" do
+    it "should assign employee to manager by admin" do
+      manager = create :manager
+      employee = create :employee
       admin = create :admin
       login admin
 
@@ -108,28 +107,6 @@ RSpec.describe "Members", type: :request do
 
       post "/members/#{member.id}/assigned", team_id: 12
       expect(response).to have_http_status 404
-    end
-  end
-
-  describe "list tasks working on" do
-    it 'list tasks' do
-      @manager = create :manager
-      @employee = create :employee
-      @team = create :teamOne
-      @project = create :projectOne
-      @manager.assign_to @team
-      @team.assign_to @project
-
-      task1 = @project.tasks.create(name: 'task1', description: 't', team_id: @team.id.to_s, member_id: @manager.id.to_s)
-      task1.assign_to @manager, @employee
-      task2 = @project.tasks.create(name: 'task2', description: 't', team_id: @team.id.to_s, member_id: @manager.id.to_s)
-
-      login @employee
-      get "/members/#{@employee.id}/tasks"
-      expect(response).to have_http_status 200
-      data = JSON.parse response.body
-      expect(data.size).to eq(1)
-      expect(data[0]["name"]).to eq(task1.name)
     end
   end
 end
