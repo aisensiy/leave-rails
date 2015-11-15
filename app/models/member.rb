@@ -11,6 +11,7 @@ class Member
 
   embeds_many :leave_requests
   embeds_many :timecards
+  embeds_many :leave_conflicts
 
   validates_presence_of :name, :password, :role
 

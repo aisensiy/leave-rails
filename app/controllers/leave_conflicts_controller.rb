@@ -1,74 +1,55 @@
 class LeaveConflictsController < ApplicationController
-  before_action :set_leave_conflict, only: [:show, :edit, :update, :destroy]
+  # before_action :set_leave_conflict, only: [:show, :edit, :update, :destroy]
+  before_filter :set_member, only: [:show, :index]
 
   # GET /leave_conflicts
   # GET /leave_conflicts.json
   def index
-    @leave_conflicts = LeaveConflict.all
+    @leave_conflicts = @member.leave_conflicts.all
   end
 
   # GET /leave_conflicts/1
   # GET /leave_conflicts/1.json
   def show
+    @leave_conflict = @member.leave_conflicts.find(params[:id])
+    if @leave_conflict.nil?
+      render status: 404, nothing: true and return
+    end
   end
 
   # GET /leave_conflicts/new
   def new
-    @leave_conflict = LeaveConflict.new
-  end
-
-  # GET /leave_conflicts/1/edit
-  def edit
+    @leave_conflict = LeaveRequest.new
   end
 
   # POST /leave_conflicts
   # POST /leave_conflicts.json
   def create
-    @leave_conflict = LeaveConflict.new(leave_conflict_params)
-
-    respond_to do |format|
-      if @leave_conflict.save
-        format.html { redirect_to @leave_conflict, notice: 'Leave conflict was successfully created.' }
-        format.json { render :show, status: :created, location: @leave_conflict }
-      else
-        format.html { render :new }
-        format.json { render json: @leave_conflict.errors, status: :unprocessable_entity }
-      end
+    unless current_user.system?
+      render status: 403, nothing: true and return
     end
-  end
 
-  # PATCH/PUT /leave_conflicts/1
-  # PATCH/PUT /leave_conflicts/1.json
-  def update
-    respond_to do |format|
-      if @leave_conflict.update(leave_conflict_params)
-        format.html { redirect_to @leave_conflict, notice: 'Leave conflict was successfully updated.' }
-        format.json { render :show, status: :ok, location: @leave_conflict }
-      else
-        format.html { render :edit }
-        format.json { render json: @leave_conflict.errors, status: :unprocessable_entity }
-      end
-    end
-  end
+    @member = Member.find(params[:member_id])
+    @leave_conflict = @member.leave_conflicts.build(leave_conflict_params)
 
-  # DELETE /leave_conflicts/1
-  # DELETE /leave_conflicts/1.json
-  def destroy
-    @leave_conflict.destroy
-    respond_to do |format|
-      format.html { redirect_to leave_conflicts_url, notice: 'Leave conflict was successfully destroyed.' }
-      format.json { head :no_content }
+    if @leave_conflict.save
+      render :show, status: :created, location: member_leave_conflict_url(@member, @leave_conflict)
+    else
+      render status: 400, nothing: true
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_leave_conflict
-      @leave_conflict = LeaveConflict.find(params[:id])
-    end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def leave_conflict_params
-      params[:leave_conflict]
+  def set_member
+    @member = Member.find(params[:member_id])
+    if @member != current_user && @member.assign != current_user
+      render status: 403, nothing: true and return
     end
+  end
+
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def leave_conflict_params
+    params.require(:leave_conflict).permit(:leave_request_id, :leave_conflict_id)
+  end
 end
