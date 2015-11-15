@@ -16,4 +16,10 @@ FactoryGirl.define do
     password "123"
     role :admin
   end
+
+  factory :system, class: Member do
+    name "system"
+    password "123"
+    role :system
+  end
 end

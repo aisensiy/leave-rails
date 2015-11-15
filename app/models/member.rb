@@ -4,12 +4,13 @@ class Member
   include Mongoid::Enum
   include ActiveModel::SecurePassword
 
-  enum :role, [:manager, :employee, :admin]
+  enum :role, [:manager, :employee, :admin, :system]
 
   field :name, type: String
   field :password_digest
 
   embeds_many :leave_requests
+  embeds_many :timecards
 
   validates_presence_of :name, :password, :role
 
