@@ -9,6 +9,8 @@ class Member
   field :name, type: String
   field :password_digest
 
+  embeds_many :leave_requests
+
   validates_presence_of :name, :password, :role
 
   has_secure_password
