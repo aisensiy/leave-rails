@@ -41,12 +41,14 @@ RSpec.describe "LeaveConflicts", type: :request do
 
   describe "get one leave_conflict" do
     it "should get one leave_conflict" do
+      @leave_conflict = @employee.leave_conflicts.create(timecard_id: @timecard.id,
+                                                         leave_request_id: @leave_request.id)
       login(@employee)
       get "/members/#{@employee.id}/leave_conflicts/#{@leave_conflict.id}"
       expect(response).to have_http_status(200)
       data = JSON.parse(response.body)
-      expect(data['hour']).to eq(@leave_conflict.hour)
-      expect(data['date']).to eq(@leave_conflict.date.to_s)
+      expect(data['leave_request_id']).to eq(@leave_conflict.leave_request_id)
+      expect(data['timecard_id']).to eq(@leave_conflict.timecard_id)
     end
 
     it "should 404" do
@@ -70,39 +72,6 @@ RSpec.describe "LeaveConflicts", type: :request do
       expect(data.size).to eq(6)
       first = data[-1]
       expect(first["date"]).to eq("2015-11-05")
-    end
-  end
-
-  describe "process leave_conflicts" do
-    before(:each) do
-      @employee = create :employee
-      @manager = create :manager
-      @employee.assign_to @manager
-
-      leave_conflict_attrs = attributes_for :leave_conflict
-      @leave_conflict = @employee.leave_conflicts.create leave_conflict_attrs
-    end
-
-    it "should approve request" do
-      login(@manager)
-      post "/members/#{@employee.id}/leave_conflicts/#{@leave_conflict.id}/processed", approved: true
-      expect(response).to have_http_status 200
-      @leave_conflict.reload
-      expect(@leave_conflict.approved?).to be(true)
-    end
-
-    it "should reject request" do
-      login(@manager)
-      post "/members/#{@employee.id}/leave_conflicts/#{@leave_conflict.id}/processed", rejected: true
-      expect(response).to have_http_status 200
-      @leave_conflict.reload
-      expect(@leave_conflict.rejected?).to be(true)
-    end
-
-    it "should 403 if not @employee's manger" do
-      login(@employee)
-      post "/members/#{@employee.id}/leave_conflicts/#{@leave_conflict.id}/processed", rejected: true
-      expect(response).to have_http_status 403
     end
   end
 end

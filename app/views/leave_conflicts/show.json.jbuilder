@@ -1,1 +1,1 @@
-json.extract! @leave_conflict, :id, :created_at, :updated_at
+json.extract! @leave_conflict, :id, :created_at, :updated_at, :leave_request_id, :timecard_id
