@@ -22,8 +22,25 @@ class LeaveRequestsController < ApplicationController
     @leave_request = LeaveRequest.new
   end
 
-  # GET /leave_requests/1/edit
-  def edit
+  def processed
+    @leave_request = @member.leave_requests.find(params[:id])
+    if @leave_request.nil?
+      render status: 404, nothing: true and return
+    end
+
+    if current_user != @member.assign
+      render status: 403, nothing: true and return
+    end
+
+    if params[:approved]
+      @leave_request.approved!
+    elsif params[:rejected]
+      @leave_request.rejected!
+    else
+      render status: 400, nothing: true and return
+    end
+
+    render status: 200, nothing: true
   end
 
   # POST /leave_requests
@@ -46,7 +63,7 @@ class LeaveRequestsController < ApplicationController
 
   def set_member
     @member = Member.find(params[:member_id])
-    if @member != current_user
+    if @member != current_user && @member.assign != current_user
       render status: 403, nothing: true and return
     end
   end

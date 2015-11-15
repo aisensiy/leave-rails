@@ -72,4 +72,37 @@ RSpec.describe "LeaveRequests", type: :request do
       expect(first["title"]).to eq("title_0")
     end
   end
+
+  describe "process leave_requests" do
+    before(:each) do
+      @employee = create :employee
+      @manager = create :manager
+      @employee.assign_to @manager
+
+      leave_attrs = attributes_for :leave_request
+      @leave_request = @employee.leave_requests.create leave_attrs
+    end
+
+    it "should approve request" do
+      login(@manager)
+      post "/members/#{@employee.id}/leave_requests/#{@leave_request.id}/processed", approved: true
+      expect(response).to have_http_status 200
+      @leave_request.reload
+      expect(@leave_request.approved?).to be(true)
+    end
+
+    it "should reject request" do
+      login(@manager)
+      post "/members/#{@employee.id}/leave_requests/#{@leave_request.id}/processed", rejected: true
+      expect(response).to have_http_status 200
+      @leave_request.reload
+      expect(@leave_request.rejected?).to be(true)
+    end
+
+    it "should 403 if not employee's manger" do
+      login(@employee)
+      post "/members/#{@employee.id}/leave_requests/#{@leave_request.id}/processed", rejected: true
+      expect(response).to have_http_status 403
+    end
+  end
 end
