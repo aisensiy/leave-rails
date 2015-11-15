@@ -22,10 +22,9 @@ RSpec.describe "LeaveConflicts", type: :request do
     end
 
     it "create new leave_conflict with valide input" do
-      leave_conflict_attrs = attributes_for :leave_conflict
       system = create :system
       login system
-      post "/members/#{@employee.id}/leave_conflicts", leave_conflict: leave_conflict_attrs
+      post "/members/#{@employee.id}/leave_conflicts", leave_conflict: {timecard_id: @timecard.id, leave_request_id: @leave_request.id}
       leave_conflict = @employee.reload.leave_conflicts.last
       expect(response).to have_http_status(201)
       expect(response.headers['Location']).to end_with("/members/#{@employee.id}/leave_conflicts/#{leave_conflict.id}")
@@ -61,17 +60,17 @@ RSpec.describe "LeaveConflicts", type: :request do
   describe "list leave_conflicts" do
     it "should list leave_conflicts" do
       5.times do |i|
-        attrs = attributes_for :leave_conflict, date: "2015-11-0#{i + 1}"
-        @employee.leave_conflicts.create attrs
+        @employee.leave_conflicts.create(timecard_id: @timecard.id,
+                                         leave_request_id: @leave_request.id)
       end
 
       login(@employee)
       get "/members/#{@employee.id}/leave_conflicts"
       expect(response).to have_http_status(200)
       data = JSON.parse(response.body)
-      expect(data.size).to eq(6)
+      expect(data.size).to eq(5)
       first = data[-1]
-      expect(first["date"]).to eq("2015-11-05")
+      expect(first["timecard"]["date"].to_datetime).to eq(@timecard.date)
     end
   end
 end

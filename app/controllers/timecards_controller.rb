@@ -33,7 +33,7 @@ class TimecardsController < ApplicationController
     @timecard = @member.timecards.build(timecard_params)
 
     if @timecard.save
-      render :show, status: :created, location: member_timecard_url(@member, @timecard)
+      render nothing: true, status: :created, location: member_timecard_url(@member, @timecard)
     else
       render status: 400, nothing: true
     end

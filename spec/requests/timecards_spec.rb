@@ -68,36 +68,4 @@ RSpec.describe "Timecards", type: :request do
     end
   end
 
-  describe "process timecards" do
-    before(:each) do
-      @employee = create :employee
-      @manager = create :manager
-      @employee.assign_to @manager
-
-      timecard_attrs = attributes_for :timecard
-      @timecard = @employee.timecards.create timecard_attrs
-    end
-
-    it "should approve request" do
-      login(@manager)
-      post "/members/#{@employee.id}/timecards/#{@timecard.id}/processed", approved: true
-      expect(response).to have_http_status 200
-      @timecard.reload
-      expect(@timecard.approved?).to be(true)
-    end
-
-    it "should reject request" do
-      login(@manager)
-      post "/members/#{@employee.id}/timecards/#{@timecard.id}/processed", rejected: true
-      expect(response).to have_http_status 200
-      @timecard.reload
-      expect(@timecard.rejected?).to be(true)
-    end
-
-    it "should 403 if not @employee's manger" do
-      login(@employee)
-      post "/members/#{@employee.id}/timecards/#{@timecard.id}/processed", rejected: true
-      expect(response).to have_http_status 403
-    end
-  end
 end
