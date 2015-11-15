@@ -24,16 +24,16 @@ class LeaveRequestsController < ApplicationController
   # POST /leave_requests
   # POST /leave_requests.json
   def create
-    @leave_request = LeaveRequest.new(leave_request_params)
+    @member = Member.find(params[:member_id])
+    if @member != current_user
+      render status: 403, nothing: true and return
+    end
+    @leave_request = @member.leave_requests.build(leave_request_params)
 
-    respond_to do |format|
-      if @leave_request.save
-        format.html { redirect_to @leave_request, notice: 'Leave request was successfully created.' }
-        format.json { render :show, status: :created, location: @leave_request }
-      else
-        format.html { render :new }
-        format.json { render json: @leave_request.errors, status: :unprocessable_entity }
-      end
+    if @leave_request.save
+      render :show, status: :created, location: member_leave_request_url(@member, @leave_request)
+    else
+      render status: 400, nothing: true
     end
   end
 
@@ -62,13 +62,13 @@ class LeaveRequestsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_leave_request
-      @leave_request = LeaveRequest.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_leave_request
+    @leave_request = LeaveRequest.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def leave_request_params
-      params[:leave_request]
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def leave_request_params
+    params.require(:leave_request).permit(:from, :to, :title)
+  end
 end

@@ -9,4 +9,6 @@ class LeaveRequest
   field :to, type: Time
 
   embedded_in :member
+
+  validates_presence_of :title, :from, :to
 end
